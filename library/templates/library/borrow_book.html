@@ -1,0 +1,103 @@
+{% extends 'library/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Borrow a Book</h2>
+
+    <!-- Current Borrows Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">Your Current Borrows ({{ current_borrows.count }}/{{ max_allowed }})</h5>
+        </div>
+        {% if current_borrows %}
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                {% for lending in current_borrows %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-1">{{ lending.book.title }}</h6>
+                            <small class="text-muted">Due date: {{ lending.due_date|date:"F d, Y" }}</small>
+                        </div>
+                        <a href="{% url 'return_book' lending.id %}" class="btn btn-outline-primary btn-sm">Return</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Borrow Form -->
+    {% if current_borrows.count < max_allowed %}
+    <div class="card">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {% for error in form.non_field_errors %}
+                    {{ error }}
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="{{ form.book.id_for_label }}" class="form-label">Select a Book</label>
+                    {{ form.book }}
+                    {% if form.book.errors %}
+                    <div class="text-danger">
+                        {% for error in form.book.errors %}
+                        {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Borrow Book</button>
+                <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">Back to Book List</a>
+            </form>
+        </div>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        You have reached the maximum number of books you can borrow ({{ max_allowed }}). 
+        Please return some books before borrowing new ones.
+    </div>
+    {% endif %}
+
+    <!-- Borrowing Rules -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">Borrowing Rules</h5>
+        </div>
+        <div class="card-body">
+            <ul class="list-unstyled mb-0">
+                <li>✓ You can borrow up to {{ max_allowed }} books at a time</li>
+                <li>✓ The standard loan period is 14 days</li>
+                <li>✓ Late returns will incur a fine of $1 per day</li>
+                <li>✓ You cannot borrow new books if you have overdue books</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Add Bootstrap Select2 for better book selection -->
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#{{ form.book.id_for_label }}').select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Select a book to borrow',
+            width: '100%'
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %} 

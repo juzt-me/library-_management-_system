@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>My Dashboard</h3>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h4>Member Information</h4>
+                        <p>
+                            <strong>Name:</strong> {{ member.user.get_full_name }}<br>
+                            <strong>Email:</strong> {{ member.user.email }}<br>
+                            <strong>Phone:</strong> {{ member.phone_number }}<br>
+                            <strong>Member Since:</strong> {{ member.membership_date|date:"F d, Y" }}
+                        </p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a href="{% url 'borrow_book' %}" class="btn btn-primary">Borrow New Book</a>
+                    </div>
+                </div>
+
+                <h4>Currently Borrowed Books</h4>
+                {% if borrowed_books %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Author</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for lending in borrowed_books %}
+                                    <tr>
+                                        <td>{{ lending.book.title }}</td>
+                                        <td>{{ lending.book.author }}</td>
+                                        <td>{{ lending.issue_date|date:"M d, Y" }}</td>
+                                        <td>{{ lending.due_date|date:"M d, Y" }}</td>
+                                        <td>
+                                            {% if lending.is_overdue %}
+                                                <span class="badge bg-danger">Overdue</span>
+                                            {% else %}
+                                                <span class="badge bg-success">On Time</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <form method="post" action="{% url 'return_book' lending.id %}" style="display: inline;">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-primary">Return</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        You haven't borrowed any books yet.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

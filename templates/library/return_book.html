@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Return Book</h2>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <h4>Book Details</h4>
+                    <p>
+                        <strong>Title:</strong> {{ lending.book.title }}<br>
+                        <strong>Author:</strong> {{ lending.book.author }}<br>
+                        <strong>Borrowed Date:</strong> {{ lending.issue_date|date:"F d, Y" }}<br>
+                        <strong>Due Date:</strong> {{ lending.due_date|date:"F d, Y" }}
+                    </p>
+                    {% if lending.is_overdue %}
+                        <div class="alert alert-warning">
+                            This book is overdue. You may be charged a fine upon return.
+                        </div>
+                    {% endif %}
+                </div>
+                <form method="post" class="text-center">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Confirm Return</button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
